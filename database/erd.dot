@@ -1,0 +1,59 @@
+digraph incidex {
+  graph [rankdir=LR, fontname="Helvetica", bgcolor="white", pad="0.3", nodesep="0.6", ranksep="1.1"];
+  node  [shape=plaintext, fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=10, color="#555555", arrowhead=crow, arrowtail=tee, dir=both];
+
+  users [label=<
+  <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#1f3b57">
+    <TR><TD BGCOLOR="#1f3b57" ALIGN="LEFT"><FONT COLOR="white"><B>users</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="id"><B>id</B> SERIAL PK</TD></TR>
+    <TR><TD ALIGN="LEFT">name VARCHAR(100)</TD></TR>
+    <TR><TD ALIGN="LEFT">email VARCHAR(255) UNIQUE</TD></TR>
+    <TR><TD ALIGN="LEFT">password_hash VARCHAR(255)</TD></TR>
+    <TR><TD ALIGN="LEFT">role reporter | analyst | admin</TD></TR>
+    <TR><TD ALIGN="LEFT">created_at TIMESTAMPTZ</TD></TR>
+  </TABLE>>];
+
+  incidents [label=<
+  <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#b03a2e">
+    <TR><TD BGCOLOR="#b03a2e" ALIGN="LEFT"><FONT COLOR="white"><B>incidents</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="id"><B>id</B> SERIAL PK</TD></TR>
+    <TR><TD ALIGN="LEFT">title VARCHAR(150)</TD></TR>
+    <TR><TD ALIGN="LEFT">description TEXT</TD></TR>
+    <TR><TD ALIGN="LEFT">category (phishing, malware, ...)</TD></TR>
+    <TR><TD ALIGN="LEFT">severity low | medium | high | critical</TD></TR>
+    <TR><TD ALIGN="LEFT">status open → ... → closed</TD></TR>
+    <TR><TD ALIGN="LEFT">affected_asset VARCHAR(150)</TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="rep">reported_by FK → users</TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="asg">assigned_to FK → users (nullable)</TD></TR>
+    <TR><TD ALIGN="LEFT">created_at / updated_at / resolved_at</TD></TR>
+  </TABLE>>];
+
+  comments [label=<
+  <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#1e6b52">
+    <TR><TD BGCOLOR="#1e6b52" ALIGN="LEFT"><FONT COLOR="white"><B>incident_comments</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>id</B> SERIAL PK</TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="inc">incident_id FK → incidents</TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="usr">user_id FK → users</TD></TR>
+    <TR><TD ALIGN="LEFT">comment TEXT</TD></TR>
+    <TR><TD ALIGN="LEFT">created_at TIMESTAMPTZ</TD></TR>
+  </TABLE>>];
+
+  history [label=<
+  <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#6c4a8c">
+    <TR><TD BGCOLOR="#6c4a8c" ALIGN="LEFT"><FONT COLOR="white"><B>incident_history</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>id</B> SERIAL PK</TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="inc">incident_id FK → incidents</TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="usr">changed_by FK → users</TD></TR>
+    <TR><TD ALIGN="LEFT">field_changed VARCHAR(30)</TD></TR>
+    <TR><TD ALIGN="LEFT">old_value / new_value TEXT</TD></TR>
+    <TR><TD ALIGN="LEFT">changed_at TIMESTAMPTZ</TD></TR>
+  </TABLE>>];
+
+  users:id -> incidents:rep [label="reports"];
+  users:id -> incidents:asg [label="assigned"];
+  incidents:id -> comments:inc [label="has"];
+  incidents:id -> history:inc [label="logs"];
+  users:id -> comments:usr [style=dashed];
+  users:id -> history:usr [style=dashed];
+}
